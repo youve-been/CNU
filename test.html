@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <style>
+        body {
+            background-color: #f5f6f7;
+        }
+        .wrap {
+            width: 330 px;
+            /*div 중앙정렬*/
+            margin-left:auto;
+            margin-right:auto;
+        }
+        input {
+            border: none; 
+            box-sizing: border-box;
+        }
+        .name {
+            margin: 8px 0px;
+        }
+        .text_input {
+            width: 100%;
+            height: 45px;
+
+            padding-left: 14px;
+        }
+        .form_elem {
+            margin-bottom: 28px;
+        }
+        .form_elem_label {
+            font-size: 15px;
+
+            padding-left: 5px;
+            padding-bottom: 7px;
+        }
+        .logo {
+            width: 255px;
+
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .logo > img {
+            width: 100%;
+            height: 100%;
+        }
+        select {
+            width: 165px;
+            height: 45px;
+
+            border: none;
+        }
+        .mail_id_input {
+            width: 150px;
+            height: 45px;
+        }
+
+        .submit_wrap input {
+            width: 100%;
+            height: 45px;
+
+            background-color: #03c75a;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <!-- method = POST / GET -->
+        <div class="logo_wrap">
+            <div class = "logo">
+                <img src=".\logo_never.png">
+            </div>
+        </div>
+        <form action="http://localhost:8000/getdata" method ="POST">
+            <div class="id_wrap form_elem">
+                <label>
+                    <div class="form_elem_label">아이디</div>
+                    <input class ="text_input" type="text" name="id" placeholder="아이디를 입력해주세요" />
+                </label>
+            </div>
+            <div class="pw_wrap form_elem">
+                <label>
+                    <div class="form_elem_label">비밀번호</div>
+                    <input class ="text_input" type="password" name="pw" placeholder="비밀번호를 입력해주세요" />
+                </label>
+            </div>
+            <div class="name_wrap form_elem">
+                <label>
+                    <div class="form_elem_label">전화번호</div>
+                    <input class ="text_input" type="text" name="phone" placeholder="전화번호를 입력해주세요" />
+                </label>
+            </div>
+            <div class="email_wrap form_elem">
+                <div class="form_elem_label">이메일</div>
+                <div style="display: flex;">
+                    <input class="mail_id_input" type="text" name="email_id" /><!--
+                    --><div style="width: 15px; margin-top: auto; margin-bottom: auto; display: inline-block;">@</div><!--
+                    --><select name="email_host">
+                        <option value="-1">선택</option>
+                        <option value="gmail">gmail.com</option>
+                        <option value="naver">naver.com</option>
+                        <option value="sogang">sogang.ac.kr</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mailing_wrap form_elem">
+                <div class="form_elem_label">홍보메일 수신 여부</div>
+                <!-- INLINE에 바로 넣은 STYLE (권장 X) -->
+                <div style="display: flex; justify-content: space-around;">
+                    <label>
+                        <input type="radio" name="mailing" value="true" />
+                        <span>동의</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="mailing" value="false" />
+                        <span>동의 안함</span>
+                    </label>
+                </div>
+            </div>
+            <!-- <input type="checkbox" />
+            // <input type="radio" />  -->
+            <div class="submit_wrap">
+                <input type="submit" value="가입하기" />
+            <div>
+        </form>
+    </div>
+    <script>
+        // Javascipt
+        // function chkInputValues(event){
+        //     e.preventDefault();
+
+        //     let inputID = document.querySelector(`input[name="id"]`)
+        //     let inputPW = document.querySelector(`input[name="pw"]`)
+
+        //     if(inputID.value == ""){
+        //         alert("아이디를 입력해주세요")
+        //     }else if(inputPW.value == ""){
+        //         alert("비밀번호를 입력해주세요")
+        //     }
+
+        // }
+
+        let ifIdDup = true;
+
+        document.querySelector(`input[name="id"]`).addEventListener("focusout", function (event) {
+            let target = event.target
+            let val = target.value
+            // let target = document.querySelector(`input[name="id"]`)
+
+            
+            if(val == "") return;
+
+            fetch(`http://localhost:8000/chk-duplicate-id`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    "id": val
+                })
+            })
+                .then(function (response) {
+                    return response.json()
+                })
+                .then(function (data) {
+                    if (data.msg == "ok") {
+                        //가입 가능 style
+                        ifIdDup = false;
+                        document.querySelector(".form_elem_msg").textContent = "가입 가능한 아이디입니다."
+                    } else {
+                        ifIdDup = true;
+                        document.querySelector(".form_elem_msg").textContent = "이미 가입된 사용자입니다."
+                    }
+                })
+        })
+
+        document.querySelector(`input[type="submit"]`).addEventListener("click", function (event) {
+            // 이 버튼의 기본 event로 SUBMIT을 실행
+            // 기본 event = form을 제출시키는 것
+            event.preventDefault();
+
+            let inputID = document.querySelector(`input[name="id"]`)
+            let inputPW = document.querySelector(`input[name="pw"]`)
+            let inputPhone = document.querySelector(`input[name="phone"]`)
+
+            if (inputID.value == "") {
+                alert("아이디를 입력해주세요")
+            }else if(ifIdDup) {
+                alert('중복된 아이디입니다!')
+            }else if (inputPW.value == "") {
+                alert("비밀번호를 입력해주세요")
+            } else if (inputPhone.value == "") {
+                alert("휴대폰 번호를. ..")
+            } else {
+                document.querySelector("form").submit()
+            }
+        });
+
+    </script>
+</body>
+</html>
